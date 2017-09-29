@@ -44,7 +44,7 @@ class TostClient(object):
             raise Exception("request failed")
     
         return {
-            "msg": "successful index request",
+            "msg": "successful {} request".format(cmd),
             "data": {
                 "tosts": tosts
             }
@@ -84,5 +84,47 @@ class TostClient(object):
                    .format(cmd, access_token),
             "data": {
                 "tost": tost
+            }
+        }
+
+    def permit(self, args, cmd):
+        domain = self.base_domain + "/tost/" + args["ppgn_token"] \
+                + "/propagation"
+        response = requests.get(domain, auth=args["auth"])
+        status_code, response = response.status_code, response.json()
+
+        try:
+            propagations = response["propagations"]
+        except:
+            raise Exception("request failed")
+
+        return {
+            "msg": "successful {} request".format(cmd),
+            "data": {
+                "propagations": propagations
+            }
+        }
+
+    def switch(self, args, cmd):
+        domain = self.base_domain + "/tost/" + args["ppgn_token"] \
+                + "/propagation/" + cmd
+        response = requests.post(domain, auth=args["auth"], data=args["data"])
+        status_code, response = response.status_code, response.json()
+
+        if status_code == 400:
+            raise Exception(response["msg"])
+
+        try:
+            access_token = response["access-token"],
+            parent_access_token = response["parent-access-token"]
+        except:
+            raise Exception("request failed")
+
+        return {
+            "msg": "successful {} for tost with access token {}"\
+                   .format(cmd, access_token),
+            "data": {
+                "access-token": access_token,
+                "parent-access-token": parent_access_token
             }
         }
