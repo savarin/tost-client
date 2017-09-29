@@ -30,3 +30,59 @@ class TostClient(object):
                 "auth_token": auth_token
             }
         }
+
+    def multiple(self, args, cmd):
+        domain = self.base_domain + "/tost"
+        response = requests.get(domain, auth=args["auth"])
+        status_code, response = response.status_code, response.json()
+    
+        try:
+            tosts = {}
+            for k, v in response.iteritems():
+                tosts[str(k)] = str(v)
+        except:
+            raise Exception("request failed")
+    
+        return {
+            "msg": "successful index request",
+            "data": {
+                "tosts": tosts
+            }
+        }
+
+    def individual(self, args, cmd):
+        path = "" if cmd == "create" else "/" + args["ppgn_token"]
+        request_type = {
+            "create": "post",
+            "view": "get",
+            "edit": "put"
+        }
+
+        domain = self.base_domain + "/tost" + path
+        exec('response = requests.{}(domain, auth=args["auth"], data=args["data"])'
+             .format(request_type[cmd]))
+        status_code, response = response.status_code, response.json()
+
+        if cmd == "create":
+            if status_code == 400:
+                raise Exception(response["msg"])
+        if cmd in set(["view", "edit"]):
+            if status_code == 404:
+                raise Exception(response["msg"])
+        if cmd == "edit":
+            if status_code == 302:
+                raise Exception(response["msg"] + " " + response["access-token"])
+
+        try:
+            tost = response["tost"]
+            access_token = tost["access-token"]
+        except:
+            raise Exception("request failed")
+
+        return {
+            "msg": "successful {} for tost with access token {}"\
+                   .format(cmd, access_token),
+            "data": {
+                "tost": tost
+            }
+        }
