@@ -23,7 +23,7 @@ class TostClient(object):
             raise Exception("request failed")
 
         return {
-            "msg": "successful {} for {} with id {}"\
+            "msg": "successful {} for {} with id {}"
                    .format(cmd, email, auth_token),
             "data": {
                 "email": email,
@@ -35,14 +35,14 @@ class TostClient(object):
         domain = self.base_domain + "/tost"
         response = requests.get(domain, auth=args["auth"])
         status_code, response = response.status_code, response.json()
-    
+
         try:
             tosts = {}
             for k, v in response.iteritems():
                 tosts[str(k)] = str(v)
         except:
             raise Exception("request failed")
-    
+
         return {
             "msg": "successful {} request".format(cmd),
             "data": {
@@ -80,7 +80,7 @@ class TostClient(object):
             raise Exception("request failed")
 
         return {
-            "msg": "successful {} for tost with access token {}"\
+            "msg": "successful {} for tost with access token {}"
                    .format(cmd, access_token),
             "data": {
                 "tost": tost
@@ -121,10 +121,10 @@ class TostClient(object):
             raise Exception("request failed")
 
         return {
-            "msg": "successful {} for tost with access token {}"\
-                   .format(cmd, access_token),
+            "msg": "successful {} for tost with access token {}"
+                   .format(cmd, access_token[0]),
             "data": {
-                "access-token": access_token,
+                "access-token": access_token[0],
                 "parent-access-token": parent_access_token
             }
         }
