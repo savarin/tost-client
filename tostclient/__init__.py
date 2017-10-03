@@ -1,6 +1,8 @@
 import os
 import requests
 
+from helpers import decode_response
+
 
 class TostClient(object):
 
@@ -34,7 +36,7 @@ class TostClient(object):
     def multiple(self, args, cmd):
         domain = self.base_domain + "/tost"
         response = requests.get(domain, headers=args["headers"])
-        status_code, response = response.status_code, response.json()
+        status_code, response = response.status_code, decode_response(response)
 
         try:
             tosts = {}
@@ -61,7 +63,7 @@ class TostClient(object):
         domain = self.base_domain + "/tost" + path
         exec('response = requests.{}(domain, headers=args["headers"], data=args["data"])'
              .format(request_type[cmd]))
-        status_code, response = response.status_code, response.json()
+        status_code, response = response.status_code, decode_response(response)
 
         if cmd == "create":
             if status_code == 400:
@@ -91,7 +93,7 @@ class TostClient(object):
         domain = self.base_domain + "/tost/" + args["ppgn_token"] \
                 + "/propagation"
         response = requests.get(domain, headers=args["headers"])
-        status_code, response = response.status_code, response.json()
+        status_code, response = response.status_code, decode_response(response)
 
         try:
             propagations = response["propagations"]
@@ -109,7 +111,7 @@ class TostClient(object):
         domain = self.base_domain + "/tost/" + args["ppgn_token"] \
                 + "/propagation/" + cmd
         response = requests.post(domain, headers=args["headers"], data=args["data"])
-        status_code, response = response.status_code, response.json()
+        status_code, response = response.status_code, decode_response(response)
 
         if status_code == 400:
             raise Exception(response["msg"])
