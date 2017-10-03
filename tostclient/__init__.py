@@ -33,7 +33,7 @@ class TostClient(object):
 
     def multiple(self, args, cmd):
         domain = self.base_domain + "/tost"
-        response = requests.get(domain, auth=args["auth"])
+        response = requests.get(domain, headers=args["headers"])
         status_code, response = response.status_code, response.json()
 
         try:
@@ -59,7 +59,7 @@ class TostClient(object):
         }
 
         domain = self.base_domain + "/tost" + path
-        exec('response = requests.{}(domain, auth=args["auth"], data=args["data"])'
+        exec('response = requests.{}(domain, headers=args["headers"], data=args["data"])'
              .format(request_type[cmd]))
         status_code, response = response.status_code, response.json()
 
@@ -90,7 +90,7 @@ class TostClient(object):
     def permit(self, args, cmd):
         domain = self.base_domain + "/tost/" + args["ppgn_token"] \
                 + "/propagation"
-        response = requests.get(domain, auth=args["auth"])
+        response = requests.get(domain, headers=args["headers"])
         status_code, response = response.status_code, response.json()
 
         try:
@@ -108,7 +108,7 @@ class TostClient(object):
     def switch(self, args, cmd):
         domain = self.base_domain + "/tost/" + args["ppgn_token"] \
                 + "/propagation/" + cmd
-        response = requests.post(domain, auth=args["auth"], data=args["data"])
+        response = requests.post(domain, headers=args["headers"], data=args["data"])
         status_code, response = response.status_code, response.json()
 
         if status_code == 400:
