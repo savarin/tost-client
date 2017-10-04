@@ -1,19 +1,27 @@
-import re
 import os
+import re
 import requests
+import sys
 from itertools import izip
 
 
 class TostClient(object):
 
-    def __init__(self, base_domain):
-        self.base_domain = base_domain
-        # self.debug_log = os.environ["TOST_DEBUG"] == "1"
+    def __init__(self, base_url, debug_log=False):
+        self.base_url = base_url
+        self.debug_log = debug_log
 
     def start(self, args, cmd):
-        domain = self.base_domain + "/" + cmd
-        response = requests.post(domain, data=args)
+        url = self.base_url + "/" + cmd
+
+        if self.debug_log:
+            sys.stderr.write("POST {} {}\n".format(str(url), str(args)))
+
+        response = requests.post(url, data=args)
         status_code, response = response.status_code, response.json()
+
+        if self.debug_log:
+            sys.stderr.write("{} {}\n".format(str(status_code), str(response)))
 
         if status_code == 400:
             raise Exception(response["msg"])
@@ -34,9 +42,16 @@ class TostClient(object):
         }
 
     def multiple(self, args, cmd):
-        domain = self.base_domain + "/tost"
-        response = requests.get(domain, headers=args["headers"])
+        url = self.base_url + "/tost"
+
+        if self.debug_log:
+            sys.stderr.write("GET {} {}\n".format(str(url), str(args)))
+
+        response = requests.get(url, headers=args["headers"])
         status_code, response = response.status_code, decode_response(response)
+
+        if self.debug_log:
+            sys.stderr.write("{} {}\n".format(str(status_code), str(response)))
 
         try:
             tosts = {}
@@ -60,10 +75,18 @@ class TostClient(object):
             "edit": "put"
         }
 
-        domain = self.base_domain + "/tost" + path
-        exec('response = requests.{}(domain, headers=args["headers"], data=args["data"])'
+        url = self.base_url + "/tost" + path
+
+        if self.debug_log:
+            sys.stderr.write("{} {} {}\n".format(str(request_type[cmd]).upper(),
+                                                 str(url), str(args)))
+
+        exec('response = requests.{}(url, headers=args["headers"], data=args["data"])'
              .format(request_type[cmd]))
         status_code, response = response.status_code, decode_response(response)
+
+        if self.debug_log:
+            sys.stderr.write("{} {}\n".format(str(status_code), str(response)))
 
         if cmd == "create":
             if status_code == 400:
@@ -90,10 +113,17 @@ class TostClient(object):
         }
 
     def permit(self, args, cmd):
-        domain = self.base_domain + "/tost/" + args["ppgn_token"] \
+        url = self.base_url + "/tost/" + args["ppgn_token"] \
                 + "/propagation"
-        response = requests.get(domain, headers=args["headers"])
+
+        if self.debug_log:
+            sys.stderr.write("GET {} {}\n".format(str(url), str(args)))
+
+        response = requests.get(url, headers=args["headers"])
         status_code, response = response.status_code, decode_response(response)
+
+        if self.debug_log:
+            sys.stderr.write("{} {}\n".format(str(status_code), str(response)))
 
         try:
             propagations = response["propagations"]
@@ -108,10 +138,17 @@ class TostClient(object):
         }
 
     def switch(self, args, cmd):
-        domain = self.base_domain + "/tost/" + args["ppgn_token"] \
+        url = self.base_url + "/tost/" + args["ppgn_token"] \
                 + "/propagation/" + cmd
-        response = requests.post(domain, headers=args["headers"], data=args["data"])
+
+        if self.debug_log:
+            sys.stderr.write("POST {} {}\n".format(str(url), str(args)))
+
+        response = requests.post(url, headers=args["headers"], data=args["data"])
         status_code, response = response.status_code, decode_response(response)
+
+        if self.debug_log:
+            sys.stderr.write("{} {}\n".format(str(status_code), str(response)))
 
         if status_code == 400:
             raise Exception(response["msg"])
